@@ -70,7 +70,18 @@ io.on('connection', function(socket) {
     console.log("Sending chat message");
     io.to(socket.room).emit('chat message', msg);
   });
+  // socket.on('data points', function(data){
+  //   console.log('DATA: ' + data[0].x);
+  //   io.emit('data points',data);
+  // })
+  socket.on('data point', function(data){
+    //console.log('DATA: ' + data[0].x);
+    io.emit('data point', data);
+  })
 });
+
+
+
 server.on('error', onError);
 server.on('listening', onListening);
 

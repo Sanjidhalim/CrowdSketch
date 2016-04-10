@@ -12,6 +12,11 @@
     <form action="">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
+
+    <canvas id="myCanvas" width="200" height="100"
+            style="border:1px solid #000000;">
+    </canvas>
+
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
@@ -25,6 +30,54 @@
       socket.on('chat message', function(msg){
         $('#messages').append($('<li>').text(msg));
       });
+    </script>
+
+    <script>
+      var canvas = document.getElementById("myCanvas");
+      var mouseDownFlag = false;
+      var context = canvas.getContext("2d");
+      var intervalId;
+      var points = [];
+      canvas.addEventListener("mousemove", function(event){
+        if(mouseDownFlag){
+          var cursorX = event.clientX - canvas.offsetLeft;
+          var cursorY = event.clientY - canvas.offsetTop;
+          context.fillRect(cursorX, cursorY, 3, 3);
+          var tmp = {'x':cursorX, 'y':cursorY};
+          socket.emit("data point", tmp);
+//          points.push(tmp);
+        }
+      });
+      canvas.addEventListener("mousedown", function(event){
+        var cursorX = event.clientX - canvas.offsetLeft;
+        var cursorY = event.clientY - canvas.offsetTop;
+        context.fillRect(cursorX, cursorY, 3, 3);
+        var tmp = {'x':cursorX, 'y':cursorY};
+//        points.push(tmp);
+        mouseDownFlag = true;
+//        socket.emit("data points", points);
+        socket.emit("data point", tmp);
+      });
+      canvas.addEventListener("mouseup", function(event){
+        mouseDownFlag = false;
+//        socket.emit('data points', points);
+//        console.log(points);
+//        points = [];
+      });
+
+//      socket.on('data points', function(data){
+//        for (i=0;i<data.length;i++){
+//          context.fillRect(data[i].x, data[i].y, 3, 3);
+//        }
+//
+//      });
+      socket.on('data point', function(data){
+//        for (i=0;i<data.length;i++){
+//          context.fillRect(data[i].x, data[i].y, 3, 3);
+//        }
+          context.fillRect(data.x, data.y, 3, 3);
+      });
+
     </script>
   </body>
 </html>
