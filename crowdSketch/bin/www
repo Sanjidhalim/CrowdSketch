@@ -32,9 +32,13 @@ io.on('connection', function(socket){
   socket.on('chat message', function(msg){
     io.emit('chat message', msg);
   });
-  socket.on('data points', function(data){
-    console.log('DATA: ' + data[0].x);
-    io.emit('data points',data);
+  // socket.on('data points', function(data){
+  //   console.log('DATA: ' + data[0].x);
+  //   io.emit('data points',data);
+  // })
+  socket.on('data point', function(data){
+    //console.log('DATA: ' + data[0].x);
+    io.emit('data point', data);
   })
 });
 

@@ -35,7 +35,6 @@
       var canvas = document.getElementById("myCanvas");
       var mouseDownFlag = false;
       var context = canvas.getContext("2d");
-      context.fillRect(0,0,10,10);
       var intervalId;
       var points = [];
       canvas.addEventListener("mousemove", function(event){
@@ -44,7 +43,8 @@
           var cursorY = event.clientY - canvas.offsetTop;
           context.fillRect(cursorX, cursorY, 3, 3);
           var tmp = {'x':cursorX, 'y':cursorY};
-          points.push(tmp);
+          socket.emit("data point", tmp);
+//          points.push(tmp);
         }
       });
       canvas.addEventListener("mousedown", function(event){
@@ -52,21 +52,29 @@
         var cursorY = event.clientY - canvas.offsetTop;
         context.fillRect(cursorX, cursorY, 3, 3);
         var tmp = {'x':cursorX, 'y':cursorY};
-        points.push(tmp);
+//        points.push(tmp);
         mouseDownFlag = true;
+//        socket.emit("data points", points);
+        socket.emit("data point", tmp);
       });
       canvas.addEventListener("mouseup", function(event){
         mouseDownFlag = false;
-        socket.emit('data points', points);
-        console.log(points);
-        points = [];
+//        socket.emit('data points', points);
+//        console.log(points);
+//        points = [];
       });
 
-      socket.on('data points', function(data){
-        for (i=0;i<data.length;i++){
-          context.fillRect(data[i].x, data[i].y, 3, 3);
-        }
-
+//      socket.on('data points', function(data){
+//        for (i=0;i<data.length;i++){
+//          context.fillRect(data[i].x, data[i].y, 3, 3);
+//        }
+//
+//      });
+      socket.on('data point', function(data){
+//        for (i=0;i<data.length;i++){
+//          context.fillRect(data[i].x, data[i].y, 3, 3);
+//        }
+          context.fillRect(data.x, data.y, 3, 3);
       });
 
     </script>
