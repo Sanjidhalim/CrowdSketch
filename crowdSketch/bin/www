@@ -26,11 +26,49 @@ var server = http.createServer(app);
  */
 
 //server.listen(port);
+    var lobby = require('../routes/Lobby');
+    var firstLobby = lobby("Lobby0");
+var x = 0;
+var rooms = [firstLobby];
 var io = require('socket.io').listen(server.listen(port));
 
-io.on('connection', function(socket){
-  socket.on('chat message', function(msg){
-    io.emit('chat message', msg);
+io.on('connection', function(socket) {
+  console.log("Connected " + (x++) + " times");
+  var openLobby = null;
+  for (var i = 0; i < rooms.length; i++) {
+    if (rooms[i].getCount() < 3) {
+      openLobby = rooms[i];
+
+      console.log(rooms[i].getName() + " is Available");
+      break;
+    }
+  }
+  if (openLobby == null) {
+    var nextlobby = lobby("Lobby" + rooms.length);
+    console.log("No open lobby");
+    rooms.push(nextlobby);
+    openLobby = nextlobby;
+  }
+
+
+  openLobby.counterIncrement();
+  socket.room = openLobby.getName();
+  socket.join(openLobby.getName());
+
+  socket.on('disconnect', function () {
+    console.log("Disconnecting");
+    if (openLobby != null) {
+      openLobby.counterDecrement();
+      if (openLobby.getCount() == 0) {
+        delete rooms[openLobby];
+      }
+      socket.leave(socket.room);
+    }
+  });
+  socket.on('chat message', function (msg) {
+//   io.emit('chat message', msg);
+    console.log("Sending chat message");
+    io.to(socket.room).emit('chat message', msg);
   });
   // socket.on('data points', function(data){
   //   console.log('DATA: ' + data[0].x);
