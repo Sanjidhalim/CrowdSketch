@@ -76,7 +76,7 @@ io.on('connection', function(socket) {
   // })
   socket.on('data point', function(data){
     //console.log('DATA: ' + data[0].x);
-    io.emit('data point', data);
+    io.to(socket.room).emit('data point', data);
   })
 });
 
