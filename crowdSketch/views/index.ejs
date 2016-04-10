@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
@@ -11,6 +12,7 @@
   <body>
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
+
 
     <ul class="list-group">
       <li class="list-group-item"><a href="./lobby?num=1">Join Room 1</a></li>
@@ -35,5 +37,106 @@
       </div>
     </form>
 
+    <canvas id="myCanvas" width="1000" height="400"
+            style="border:1px solid #000000;">
+    </canvas>
+
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+
+      var socket = io();
+      $('form').submit(function(){
+        socket.emit('chat message', $('#m').val());
+        $('#m').val('');
+        return false;
+      });
+      socket.on('chat message', function(msg){
+        $('#messages').append($('<li>').text(msg));
+      });
+    </script>
+
+    <script>
+      var canvas = document.getElementById("myCanvas");
+      var mouseDownFlag = false;
+      var context = canvas.getContext("2d");
+      var context = canvas.getContext("2d");
+      function clickColor(hex, seltop, selleft, html5) {
+        var c, cObj;
+        if (html5 && html5 == 5) {
+          c = document.getElementById("html5colorpicker").value;
+        }
+        cObj = w3color(c);
+        colorhex = cObj.toHexString();
+        var r = cObj.red;
+        var g = cObj.green;
+        var b = cObj.blue;
+        document.getElementById("html5colorpicker").value = cObj.toHexString();
+        context.beginPath();
+        context.strokeStyle=cObj.toHexString();
+        console.log("STROKE STYLE CHANGED TO"+cObj.toHexString());
+      }
+     var intervalId;
+      var points = [];
+      canvas.addEventListener("mousemove", function(event){
+        if(mouseDownFlag){
+          var cursorX = event.clientX - canvas.offsetLeft;
+          var cursorY = event.clientY - canvas.offsetTop;
+//          context.fillRect(cursorX, cursorY, 3, 3);
+          context.lineTo(cursorX, cursorY);
+          context.stroke();
+//          var tmp = {'x':cursorX, 'y':cursorY};
+//          socket.emit("data point", tmp);
+          var tmp = createMessage(cursorX, cursorY, "mousemove");
+          socket.emit("data point", tmp);
+        }
+      });
+      canvas.addEventListener("mousedown", function(event){
+        var cursorX = event.clientX - canvas.offsetLeft;
+        var cursorY = event.clientY - canvas.offsetTop;
+//        context.fillRect(cursorX, cursorY, 3, 3);
+        context.moveTo(cursorX, cursorY);
+//        var tmp = {'x':cursorX, 'y':cursorY}
+        var tmp = createMessage(cursorX, cursorY, "mousedown");
+        mouseDownFlag = true;
+        socket.emit("data point", tmp);
+      });
+      canvas.addEventListener("mouseup", function(event){
+        mouseDownFlag = false;
+        var cursorX = event.clientX - canvas.offsetLeft;
+        var cursorY = event.clientY - canvas.offsetTop;
+        var event = new MouseEvent("mouseup", {"clientX": event.clientX, "clientY": event.clientY});
+        var tmp = createMessage(cursorX, cursorY, "mouseup");
+        socket.emit("data point", tmp);
+      });
+
+      socket.on('data point', function(data){
+          decodeMessage(data);
+      });
+
+      function createMessage(x, y, event){
+        return {'x':x, 'y':y, 'event':event};
+      }
+
+      function decodeMessage(message){
+        if(message.event == "mouseup"){
+
+        }
+        else if(message.event == "mousedown"){
+          context.moveTo(message.x, message.y);
+        }
+        else if(message.event == "mousemove"){
+          context.lineTo(message.x, message.y);
+          context.stroke();
+        }
+      }
+
+    </script>
+>>>>>>> 2ab5113538a872802f766763f48d149148d8f643
   </body>
 </html>
