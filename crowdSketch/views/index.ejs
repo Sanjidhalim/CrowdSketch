@@ -43,41 +43,54 @@
         if(mouseDownFlag){
           var cursorX = event.clientX - canvas.offsetLeft;
           var cursorY = event.clientY - canvas.offsetTop;
-          context.fillRect(cursorX, cursorY, 3, 3);
-          var tmp = {'x':cursorX, 'y':cursorY};
+//          context.fillRect(cursorX, cursorY, 3, 3);
+          context.lineTo(cursorX, cursorY);
+          context.stroke();
+//          var tmp = {'x':cursorX, 'y':cursorY};
+//          socket.emit("data point", tmp);
+          var tmp = createMessage(cursorX, cursorY, "mousemove");
           socket.emit("data point", tmp);
-//          points.push(tmp);
         }
       });
       canvas.addEventListener("mousedown", function(event){
         var cursorX = event.clientX - canvas.offsetLeft;
         var cursorY = event.clientY - canvas.offsetTop;
-        context.fillRect(cursorX, cursorY, 3, 3);
-        var tmp = {'x':cursorX, 'y':cursorY};
-//        points.push(tmp);
+//        context.fillRect(cursorX, cursorY, 3, 3);
+        context.moveTo(cursorX, cursorY);
+//        var tmp = {'x':cursorX, 'y':cursorY}
+        var tmp = createMessage(cursorX, cursorY, "mousedown");
         mouseDownFlag = true;
-//        socket.emit("data points", points);
         socket.emit("data point", tmp);
       });
       canvas.addEventListener("mouseup", function(event){
         mouseDownFlag = false;
-//        socket.emit('data points', points);
-//        console.log(points);
-//        points = [];
+        var cursorX = event.clientX - canvas.offsetLeft;
+        var cursorY = event.clientY - canvas.offsetTop;
+        var event = new MouseEvent("mouseup", {"clientX": event.clientX, "clientY": event.clientY});
+        var tmp = createMessage(cursorX, cursorY, "mouseup");
+        socket.emit("data point", tmp);
       });
 
-//      socket.on('data points', function(data){
-//        for (i=0;i<data.length;i++){
-//          context.fillRect(data[i].x, data[i].y, 3, 3);
-//        }
-//
-//      });
       socket.on('data point', function(data){
-//        for (i=0;i<data.length;i++){
-//          context.fillRect(data[i].x, data[i].y, 3, 3);
-//        }
-          context.fillRect(data.x, data.y, 3, 3);
+          decodeMessage(data);
       });
+
+      function createMessage(x, y, event){
+        return {'x':x, 'y':y, 'event':event};
+      }
+
+      function decodeMessage(message){
+        if(message.event == "mouseup"){
+
+        }
+        else if(message.event == "mousedown"){
+          context.moveTo(message.x, message.y);
+        }
+        else if(message.event == "mousemove"){
+          context.lineTo(message.x, message.y);
+          context.stroke();
+        }
+      }
 
     </script>
   </body>
